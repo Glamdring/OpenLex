@@ -14,7 +14,6 @@ OpenLex цели създаването на машинно четима вер�
 * Регистрирането на проблеми и задачи по вече установените код/планове/спецификации или merge-a на корекции и допълнения става по стандартния за github проектите начин (issues, pull requests,...). Съответно, за да намерите въпроси, които искат внимание и работа, в която може да се включите - погледнете отворените проблеми в секция Issues. 
 
 # Ресурси:  
-## Resources:  
  - [Non-technical barriers to adopting a VCS for law, Quora](https://www.quora.com/Public-Policy-What-are-the-nontechnical-barriers-to-adopting-a-version-control-system-for-use-in-writing-bills-and-new-laws)
  - [Open source tax code, Tabulaw](http://blog.tabulaw.com/2011/06/open-source-tax-code.html)
  - [Gitlaw: Github for Laws and Legal Documents](https://blog.abevoelker.com/gitlaw-github-for-laws-and-legal-documents-a-tourniquet-for-american-liberty/)
