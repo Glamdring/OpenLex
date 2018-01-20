@@ -1,0 +1,68 @@
+Phase:	LawPostProcessing
+Input:  Lookup
+Options: control = appelt
+
+Rule:Law
+Priority: 10
+
+(
+{ Lookup.majorType=="law" }
+):law
+-->
+ :law.Law = {rule = "Law"}
+
+ 
+Phase:	ChapterPostProcessing
+Input:  Lookup
+Options: control = appelt
+
+Rule:Chapter
+Priority: 10
+
+(
+{ Lookup.majorType=="chapter" }
+):chapter
+-->
+:chapter.Chapter = {rule = "Chapter"}
+
+
+Phase:	AmmendmentPostProcessing
+Input:  Lookup
+Options: control = appelt
+
+Rule:Ammendment
+Priority: 10
+
+(
+{ Lookup.majorType=="ammendments" }
+):ammendments
+-->
+:ammendments.Ammendment = {rule = "Ammendment"}
+
+
+Phase:	SectionPostProcessing
+Input:  Lookup
+Options: control = appelt
+
+Rule:Section
+Priority: 10
+
+(
+{ Lookup.majorType=="section" }
+):section
+-->
+:section.Section = {rule = "Section"}
+
+
+Phase:	AlineaPostProcessing
+Input:  Lookup
+Options: control = appelt
+
+Rule:Alinea
+Priority: 10
+
+(
+{ Lookup.majorType=="alinea" }
+):subparagraph
+-->
+:subparagraph.Alinea = {rule = "Alinea"}

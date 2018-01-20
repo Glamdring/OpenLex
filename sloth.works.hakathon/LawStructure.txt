@@ -1,0 +1,24 @@
+Структура на закон
+==================
+
+закон law
+глава chapter
+раздел section
+член member
+алинея subparagraph
+точка point
+буква letter
+изречение sentence
+
+изменения
+допълнителни разпоредби ~  раздел
+преходни разпоредби
+заключителни разпоредби
+параграф
+
+amendments
+additional provisions ~ section
+transitional provisions
+final provisions
+paragraph
+

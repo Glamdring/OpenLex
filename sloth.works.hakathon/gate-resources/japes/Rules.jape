@@ -1,0 +1,120 @@
+Phase:	MemberPrefix
+Input:  Lookup DottedNumber
+Options: control = appelt
+
+Rule:MemberPrefix
+Priority: 5
+
+(
+ {Lookup.majorType=="member"}
+ {DottedNumber}
+):member
+-->
+ :member.MemberPrefix = {rule = "MemberPrefix"},
+ {
+     AnnotationSet tokens = (AnnotationSet) bindings.get("member");
+     AnnotationSet dottedNumber = tokens.get("DottedNumber", tokens.firstNode().getOffset(), tokens.lastNode().getOffset());
+     inputAS.removeAll(dottedNumber);
+ }
+
+
+Phase:	AlineaPrefix
+Input:  Token Lookup
+Options: control = appelt
+
+Rule: AlineaPrefix
+Priority: 10
+
+({Token}):alineaEnd
+(
+    {Token.string=="("} {Token.kind==number} {Token.string==")"}
+):alinea
+-->
+ :alinea.AlineaPrefix = {rule = "AlineaPrefix"},
+ :alineaEnd.AlineaEnd = {rule = "AlineaEnd"}
+
+
+Phase:	AlineaPrefix2
+Input:  DottedNumber Token
+Options: control = appelt
+
+Rule: AlineaPrefix2
+Priority: 10
+
+(
+ ({Token}):alineaEnd
+ ({DottedNumber}):ap
+)
+-->
+ :ap.AlineaPrefix = {rule = "AlineaPrefix2"},
+ {
+     AnnotationSet tokens = (AnnotationSet) bindings.get("ap");
+     AnnotationSet dottedNumber = tokens.get("DottedNumber", tokens.firstNode().getOffset(), tokens.lastNode().getOffset());
+     inputAS.removeAll(dottedNumber);
+ },
+ :alineaEnd.AlineaEnd = {rule = "AlineaEnd"}
+
+
+Phase:	AlineaContent
+Input:  AlineaPrefix AlineaEnd DocEnd
+Options: control = appelt
+
+Rule:AlineaContent
+Priority: 10
+
+(
+ {AlineaPrefix}
+ ({AlineaEnd} | {DocEnd})
+):alinea
+-->
+ :alinea.AlineaContent = {rule = "AlineaContent"}
+
+
+Phase:	MemberEnd
+Input:  MemberPrefix Token
+Options: control = appelt
+
+Rule:MemberEnd
+Priority: 10
+
+(
+ ({ Token }):memberEnd
+ { MemberPrefix }
+)
+-->
+ :memberEnd.MemberEnd = {rule = "MemberEnd"}
+
+
+Phase:	MemberText
+Input:  MemberPrefix Token AlineaPrefix DocEnd
+Options: control = first
+
+Rule:MemberText
+Priority: 10
+
+(
+ (
+ { MemberPrefix }
+ ({ Token })+
+ ):member
+ ({ AlineaPrefix } | { MemberPrefix} | {DocEnd})
+)
+-->
+ :member.MemberText = {rule = "MemberText"}
+
+
+ Phase:	MemberContent
+ Input:  MemberPrefix AlineaContent MemberEnd DocEnd
+ Options: control = first
+
+ Rule:MemberContent
+ Priority: 10
+
+ (
+  ({ MemberPrefix }
+  ({ AlineaContent })+
+  ):member
+  ({MemberEnd} | {DocEnd})
+ )
+ -->
+  :member.MemberContent = {rule = "MemberContent"}
