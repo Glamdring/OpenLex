@@ -1,0 +1,22 @@
+Phase:	RuleAddAfter
+Input:  AlineaArticleMention KeywordText KeywordAfter KeywordWith KeywordIn KeywordAdd Token
+Options: control = first
+
+Rule:SubstituteRule
+Priority: 10
+(
+{KeywordIn}
+{AlineaArticleMention}
+{KeywordAfter}
+{KeywordText}
+{Token.string=="„"}
+({Token})+
+{Token.string=="“"}
+{Token.stem=="се"}
+{KeywordAdd}
+{Token.string=="„"}
+({Token})+
+{Token.string=="“"}
+):ruleMatch
+-->
+:ruleMatch.RuleAddAfter = {rule = "RuleAddAfter"}

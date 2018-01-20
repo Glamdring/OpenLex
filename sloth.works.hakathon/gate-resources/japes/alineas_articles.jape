@@ -1,18 +1,18 @@
-Phase:	MemberPrefix
-Input:  Lookup DottedNumber
+Phase:	ArticlePrefix
+Input:  Lookup Token DottedNumber
 Options: control = appelt
 
-Rule:MemberPrefix
-Priority: 5
+Rule:ArticlePrefix
+Priority: 10
 
 (
- {Lookup.majorType=="member"}
- {DottedNumber}
-):member
+ ({Lookup.majorType=="article"}
+ {DottedNumber})
+):article
 -->
- :member.MemberPrefix = {rule = "MemberPrefix"},
+ :article.ArticlePrefix = {rule = "ArticlePrefix"},
  {
-     AnnotationSet tokens = (AnnotationSet) bindings.get("member");
+     AnnotationSet tokens = (AnnotationSet) bindings.get("article");
      AnnotationSet dottedNumber = tokens.get("DottedNumber", tokens.firstNode().getOffset(), tokens.lastNode().getOffset());
      inputAS.removeAll(dottedNumber);
  }
@@ -70,51 +70,68 @@ Priority: 10
  :alinea.AlineaContent = {rule = "AlineaContent"}
 
 
-Phase:	MemberEnd
-Input:  MemberPrefix Token
+Phase:	ArticleEnd
+Input:  ArticlePrefix Token
 Options: control = appelt
 
-Rule:MemberEnd
+Rule:ArticleEnd
 Priority: 10
 
 (
- ({ Token }):memberEnd
- { MemberPrefix }
+ ({ Token }):articleEnd
+ { ArticlePrefix }
 )
 -->
- :memberEnd.MemberEnd = {rule = "MemberEnd"}
+ :articleEnd.ArticleEnd = {rule = "ArticleEnd"}
 
 
-Phase:	MemberText
-Input:  MemberPrefix Token AlineaPrefix DocEnd
+Phase:	ArticleText
+Input:  ArticlePrefix Token AlineaPrefix DocEnd
 Options: control = first
 
-Rule:MemberText
+Rule:ArticleText
 Priority: 10
 
 (
  (
- { MemberPrefix }
+ { ArticlePrefix }
  ({ Token })+
- ):member
- ({ AlineaPrefix } | { MemberPrefix} | {DocEnd})
+ ):article
+ ({ AlineaPrefix } | { ArticlePrefix} | {DocEnd})
 )
 -->
- :member.MemberText = {rule = "MemberText"}
+ :article.ArticleText = {rule = "ArticleText"}
 
 
- Phase:	MemberContent
- Input:  MemberPrefix AlineaContent MemberEnd DocEnd
+ Phase:	ArticleContent
+ Input:  ArticlePrefix AlineaContent ArticleEnd DocEnd
  Options: control = first
 
- Rule:MemberContent
+ Rule:ArticleContent
  Priority: 10
 
  (
-  ({ MemberPrefix }
+  ({ ArticlePrefix }
   ({ AlineaContent })+
-  ):member
-  ({MemberEnd} | {DocEnd})
+  ):article
+  ({ArticleEnd} | {DocEnd})
  )
  -->
-  :member.MemberContent = {rule = "MemberContent"}
+  :article.ArticleContent = {rule = "ArticleContent"}
+
+
+ Phase: NumberedChapter
+ Input: Chapter Counting Token
+ Options: control = first
+
+ Rule: NumberedChapter
+ Priority: 10
+ (
+    ({Chapter}
+     {Counting})
+     |
+     ({Counting}
+     {Chapter})
+ ):nc
+ -->
+ :nc.NumberedChapter = {rule = "NumberedChapter" }

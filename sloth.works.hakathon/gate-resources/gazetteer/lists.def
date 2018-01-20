@@ -1,9 +1,9 @@
-ammendments.lst:ammendment
+amendments.lst:amendment
 chapter.lst:chapter
 laws.lst:law
 letter.lst:letter
-members.lst:member
-numbers.lst:number
+articles.lst:article
+numbers.lst:counting
 paragraph.lst:paragraph
 point.lst:point
 section.lst:section

@@ -66,3 +66,17 @@ Priority: 10
 ):subparagraph
 -->
 :subparagraph.Alinea = {rule = "Alinea"}
+
+
+Phase:	AmendmentPostProcessing
+Input:  Lookup
+Options: control = appelt
+
+Rule:Amendment
+Priority: 10
+
+(
+{ Lookup.majorType=="amendment" }
+):amendment
+-->
+:amendment.Amendment = {rule = "Amendment"}
