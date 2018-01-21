@@ -1,0 +1,107 @@
+Phase:	AmendmentPrefix
+Input:  Lookup Token DottedNumber
+Options: control = appelt
+
+Rule:AmendmentPrefix
+Priority: 10
+
+(
+ (
+   { Lookup.majorType == "amendment" }
+   { DottedNumber }
+ )
+):amendment
+-->
+ :amendment.AmendmentPrefix = { rule = "AmendmentPrefix" },
+ {
+     AnnotationSet tokens = (AnnotationSet) bindings.get("amendment");
+     AnnotationSet dottedNumber = tokens.get("DottedNumber", tokens.firstNode().getOffset(), tokens.lastNode().getOffset());
+     inputAS.removeAll(dottedNumber);
+ }
+
+
+Phase:	PointPrefix
+Input:  DottedNumber Token
+Options: control = appelt
+
+Rule: PointPrefix
+Priority: 10
+
+(
+  ( { Token } ):pointEnd
+  ( { DottedNumber } ):ap
+)
+-->
+ :ap.PointPrefix = {rule = "PointPrefix"},
+ {
+     AnnotationSet tokens = (AnnotationSet) bindings.get("ap");
+     AnnotationSet dottedNumber = tokens.get("DottedNumber", tokens.firstNode().getOffset(), tokens.lastNode().getOffset());
+     inputAS.removeAll(dottedNumber);
+ },
+ :pointEnd.PointEnd = {rule = "PointEnd"}
+
+
+Phase:	PointContent
+Input:  PointPrefix PointEnd DocEnd
+Options: control = appelt
+
+Rule:PointContent
+Priority: 10
+
+(
+  { PointPrefix }
+  ( { PointEnd } | { DocEnd } )
+):point
+-->
+  :point.PointContent = { rule = "PointContent" }
+
+
+Phase:	AmendmentEnd
+Input:  AmendmentPrefix Token
+Options: control = appelt
+
+Rule:AmendmentEnd
+Priority: 10
+
+(
+ ( { Token } ):amendmentEnd
+ { AmendmentPrefix }
+)
+-->
+ :amendmentEnd.AmendmentEnd = { rule = "AmendmentEnd" }
+
+
+Phase:	AmendmentText
+Input:  AmendmentPrefix Token PointPrefix DocEnd
+Options: control = first
+
+Rule:AmendmentText
+Priority: 10
+
+(
+ (
+ { AmendmentPrefix }
+ ( { Token } )+
+ ):amendment
+ ( { PointPrefix } | { AmendmentPrefix} | { DocEnd } )
+)
+-->
+ :amendment.AmendmentText = { rule = "AmendmentText" }
+
+
+ Phase:	AmendmentContent
+ Input:  AmendmentPrefix PointContent AmendmentEnd DocEnd
+ Options: control = first
+
+ Rule:AmendmentContent
+ Priority: 10
+
+ (
+  (
+  { AmendmentPrefix }
+  ( { PointContent } )+
+  ):amendment
+  ( { AmendmentEnd } | { DocEnd } )
+ )
+ -->
+  :amendment.AmendmentContent = { rule = "AmendmentContent" }

@@ -6,10 +6,10 @@ Rule:NewLine
 Priority: 10
 
 (
-    { SpaceToken.string=="\n" }
+  { SpaceToken.string == "\n" }
 ):nl
 -->
- :nl.NewLine = {rule = "NewLine"}
+  :nl.NewLine = { rule = "NewLine" }
 
 
 Phase:	DottedNumber
@@ -20,11 +20,11 @@ Rule:DottedNumber
 Priority: 10
 
 (
- { Token.kind=="number" }
- { Token.string=="." }
+  ( { Token.kind=="number" } ):num
+  { Token.string=="." }
 ):dn
 -->
-:dn.DottedNumber = {rule = "DottedNumber"}
+  :dn.DottedNumber = { rule = "DottedNumber" , number = :num.Token.string }
 
 
 Phase:	Counting
@@ -35,10 +35,10 @@ Rule:Counting
 Priority: 10
 
 (
-{ Lookup.majorType=="counting" }
+  { Lookup.majorType == "counting" }
 ):law
 -->
- :law.Counting = {rule = "Counting"}
+  :law.Counting = { rule = "Counting" }
 
 
 Phase: DocEnd
@@ -47,7 +47,7 @@ Options: control = once
 
 Rule: DocEnd
 (
- 	{Token}
+  { Token }
 ):tok
  -->
 {

@@ -3,19 +3,37 @@ Input:  Lookup Token DottedNumber
 Options: control = appelt
 
 Rule:ArticlePrefix
-Priority: 10
+Priority: 5
 
 (
- ({Lookup.majorType=="article"}
- {DottedNumber})
+ { Lookup.majorType == "article" }
+ ( { Token.string == "." } )?
+ ( { Token.kind == "number" } ):num
+ ( { Token.string== "." } )?
 ):article
 -->
- :article.ArticlePrefix = {rule = "ArticlePrefix"},
+ :article.ArticlePrefix = { rule = "ArticlePrefix", number = :num.Token.string },
  {
      AnnotationSet tokens = (AnnotationSet) bindings.get("article");
      AnnotationSet dottedNumber = tokens.get("DottedNumber", tokens.firstNode().getOffset(), tokens.lastNode().getOffset());
      inputAS.removeAll(dottedNumber);
  }
+
+
+Phase: ArticleStart
+Input: ArticlePrefix SpaceToken
+Options: control = appelt
+
+Rule:ArticleStart
+Priority: 5
+
+(
+  { SpaceToken.kind=="control" }
+  ( { ArticlePrefix } ):ap
+):astart
+
+-->
+:astart.ArticleStart = { rule = "ArticleStart", number = :ap.ArticlePrefix.number }
 
 
 Phase:	AlineaPrefix
@@ -25,13 +43,13 @@ Options: control = appelt
 Rule: AlineaPrefix
 Priority: 10
 
-({Token}):alineaEnd
+( { Token } ):alineaEnd
 (
-    {Token.string=="("} {Token.kind==number} {Token.string==")"}
+ { Token.string == "(" } { Token.kind == number } { Token.string == ")" }
 ):alinea
 -->
- :alinea.AlineaPrefix = {rule = "AlineaPrefix"},
- :alineaEnd.AlineaEnd = {rule = "AlineaEnd"}
+ :alinea.AlineaPrefix = { rule = "AlineaPrefix" },
+ :alineaEnd.AlineaEnd = { rule = "AlineaEnd" }
 
 
 Phase:	AlineaPrefix2
@@ -42,32 +60,32 @@ Rule: AlineaPrefix2
 Priority: 10
 
 (
- ({Token}):alineaEnd
- ({DottedNumber}):ap
+ ( { Token } ):alineaEnd
+ ( { DottedNumber } ):ap
 )
 -->
- :ap.AlineaPrefix = {rule = "AlineaPrefix2"},
+ :ap.AlineaPrefix = { rule = "AlineaPrefix2" , number = :ap.DottedNumber.number },
  {
      AnnotationSet tokens = (AnnotationSet) bindings.get("ap");
      AnnotationSet dottedNumber = tokens.get("DottedNumber", tokens.firstNode().getOffset(), tokens.lastNode().getOffset());
      inputAS.removeAll(dottedNumber);
  },
- :alineaEnd.AlineaEnd = {rule = "AlineaEnd"}
+ :alineaEnd.AlineaEnd = { rule = "AlineaEnd" }
 
 
 Phase:	AlineaContent
-Input:  AlineaPrefix AlineaEnd DocEnd
+Input:  AlineaStart AlineaEnd DocEnd
 Options: control = appelt
 
 Rule:AlineaContent
 Priority: 10
 
 (
- {AlineaPrefix}
- ({AlineaEnd} | {DocEnd})
+ ( { AlineaStart } ):prefix
+ ( { AlineaEnd } | { DocEnd } )
 ):alinea
 -->
- :alinea.AlineaContent = {rule = "AlineaContent"}
+ :alinea.AlineaContent = { rule = "AlineaContent" , number = :prefix.AlineaStart.number }
 
 
 Phase:	ArticleEnd
@@ -78,60 +96,43 @@ Rule:ArticleEnd
 Priority: 10
 
 (
- ({ Token }):articleEnd
+ ( { Token } ):articleEnd
  { ArticlePrefix }
 )
 -->
- :articleEnd.ArticleEnd = {rule = "ArticleEnd"}
+ :articleEnd.ArticleEnd = { rule = "ArticleEnd" },
+ :articleEnd.AlineaEnd = { rule = "ArticleEnd" }
 
 
-Phase:	ArticleText
-Input:  ArticlePrefix Token AlineaPrefix DocEnd
+
+Phase:	ArticleContent
+Input:  ArticlePrefix Token ArticleEnd DocEnd
 Options: control = first
 
-Rule:ArticleText
+Rule:ArticleContent
 Priority: 10
 
 (
- (
- { ArticlePrefix }
- ({ Token })+
- ):article
- ({ AlineaPrefix } | { ArticlePrefix} | {DocEnd})
-)
+ ( { ArticlePrefix } ):prefix
+ ( { Token } )+
+ ( { ArticleEnd } | { DocEnd })
+):article
 -->
- :article.ArticleText = {rule = "ArticleText"}
+ :article.ArticleContent = { rule = "ArticleContent", number = :prefix.ArticlePrefix.number }
 
 
- Phase:	ArticleContent
- Input:  ArticlePrefix AlineaContent ArticleEnd DocEnd
- Options: control = first
+Phase: NumberedChapter
+Input: Chapter Counting Token
+Options: control = first
 
- Rule:ArticleContent
- Priority: 10
-
- (
-  ({ ArticlePrefix }
-  ({ AlineaContent })+
-  ):article
-  ({ArticleEnd} | {DocEnd})
- )
- -->
-  :article.ArticleContent = {rule = "ArticleContent"}
-
-
- Phase: NumberedChapter
- Input: Chapter Counting Token
- Options: control = first
-
- Rule: NumberedChapter
- Priority: 10
- (
-    ({Chapter}
-     {Counting})
-     |
-     ({Counting}
-     {Chapter})
- ):nc
- -->
- :nc.NumberedChapter = {rule = "NumberedChapter" }
+Rule: NumberedChapter
+Priority: 10
+(
+ ( { Chapter }
+   { Counting } )
+ |
+ ( { Counting }
+   { Chapter } )
+):nc
+-->
+ :nc.NumberedChapter = { rule = "NumberedChapter" }

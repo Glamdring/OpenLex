@@ -6,10 +6,10 @@ Rule:Law
 Priority: 10
 
 (
-{ Lookup.majorType=="law" }
+  { Lookup.majorType == "law" }
 ):law
 -->
- :law.Law = {rule = "Law"}
+  :law.Law = { rule = "Law" }
 
  
 Phase:	ChapterPostProcessing
@@ -20,10 +20,10 @@ Rule:Chapter
 Priority: 10
 
 (
-{ Lookup.majorType=="chapter" }
+  { Lookup.majorType == "chapter" }
 ):chapter
 -->
-:chapter.Chapter = {rule = "Chapter"}
+:chapter.Chapter = { rule = "Chapter" }
 
 
 Phase:	AmmendmentPostProcessing
@@ -34,10 +34,10 @@ Rule:Ammendment
 Priority: 10
 
 (
-{ Lookup.majorType=="ammendments" }
+  { Lookup.majorType == "ammendments" }
 ):ammendments
 -->
-:ammendments.Ammendment = {rule = "Ammendment"}
+  :ammendments.Ammendment = { rule = "Ammendment" }
 
 
 Phase:	SectionPostProcessing
@@ -48,10 +48,10 @@ Rule:Section
 Priority: 10
 
 (
-{ Lookup.majorType=="section" }
+  { Lookup.majorType == "section" }
 ):section
 -->
-:section.Section = {rule = "Section"}
+  :section.Section = { rule = "Section" }
 
 
 Phase:	AlineaPostProcessing
@@ -62,10 +62,10 @@ Rule:Alinea
 Priority: 10
 
 (
-{ Lookup.majorType=="alinea" }
+  { Lookup.majorType == "alinea" }
 ):subparagraph
 -->
-:subparagraph.Alinea = {rule = "Alinea"}
+  :subparagraph.Alinea = { rule = "Alinea" }
 
 
 Phase:	AmendmentPostProcessing
@@ -76,7 +76,7 @@ Rule:Amendment
 Priority: 10
 
 (
-{ Lookup.majorType=="amendment" }
+  { Lookup.majorType == "amendment" }
 ):amendment
 -->
-:amendment.Amendment = {rule = "Amendment"}
+  :amendment.Amendment = { rule = "Amendment" }

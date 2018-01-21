@@ -5,18 +5,18 @@ Options: control = first
 Rule:SubstituteRule
 Priority: 10
 (
-{KeywordIn}
-{AlineaArticleMention}
-{KeywordAfter}
-{KeywordText}
-{Token.string=="„"}
-({Token})+
-{Token.string=="“"}
-{Token.stem=="се"}
-{KeywordAdd}
-{Token.string=="„"}
-({Token})+
-{Token.string=="“"}
+  {KeywordIn}
+  {AlineaArticleMention}
+  {KeywordAfter}
+  {KeywordText}
+  {Token.string=="„"}
+  ({Token})+
+  {Token.string=="“"}
+  {Token.stem=="се"}
+  {KeywordAdd}
+  {Token.string=="„"}
+  ({Token})+
+  {Token.string=="“"}
 ):ruleMatch
 -->
-:ruleMatch.RuleAddAfter = {rule = "RuleAddAfter"}
+  :ruleMatch.RuleAddAfter = {rule = "RuleAddAfter"}

@@ -5,21 +5,21 @@ Options: control = first
 Rule:RuleSubstitute
 Priority: 10
 (
-{KeywordIn}
-{AlineaArticleMention}
-{KeywordText}
-{Token.string=="„"}
-({Token})+
-{Token.string=="“"}
-{Token.stem=="се"}
-{KeywordSubstitute}
-{KeywordWith}
-{Token.string=="„"}
-({Token})+
-{Token.string=="“"}
+  {KeywordIn}
+  {AlineaArticleMention}
+  {KeywordText}
+  {Token.string=="„"}
+  ({Token})+
+  {Token.string=="“"}
+  {Token.stem=="се"}
+  {KeywordSubstitute}
+  {KeywordWith}
+  {Token.string=="„"}
+  ({Token})+
+  {Token.string=="“"}
 ):ruleMatch
 -->
-:ruleMatch.RuleSubstitute = {rule = "RuleSubstitute"}
+  :ruleMatch.RuleSubstitute = {rule = "RuleSubstitute"}
 
 
 Phase:	RuleSubstituteShort
@@ -29,16 +29,16 @@ Options: control = first
 Rule:RuleSubstituteShort
 Priority: 10
 (
-{Token.string=="„"}
-({Token})+
-{Token.string=="“"}
-{Token.stem=="се"}
-{KeywordSubstitute}
-({Token.stem=="съответ"})?
-{KeywordWith}
-{Token.string=="„"}
-({Token})+
-{Token.string=="“"}
-):ruleMatch
+  {Token.string=="„"}
+  ({Token})+
+  {Token.string=="“"}
+  {Token.stem=="се"}
+  {KeywordSubstitute}
+  ({Token.stem=="съответ"})?
+  {KeywordWith}
+  {Token.string=="„"}
+  ({Token})+
+  {Token.string=="“"}
+  ):ruleMatch
 -->
-:ruleMatch.RuleSubstituteShort = {rule = "RuleSubstituteShort"}
+  :ruleMatch.RuleSubstituteShort = {rule = "RuleSubstituteShort"}
