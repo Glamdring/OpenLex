@@ -20,25 +20,3 @@ Priority: 10
 ):ruleMatch
 -->
   :ruleMatch.RuleSubstitute = {rule = "RuleSubstitute"}
-
-
-Phase:	RuleSubstituteShort
-Input:  AlineaArticleMention KeywordText KeywordWith KeywordIn KeywordSubstitute Token
-Options: control = first
-
-Rule:RuleSubstituteShort
-Priority: 10
-(
-  {Token.string=="„"}
-  ({Token})+
-  {Token.string=="“"}
-  {Token.stem=="се"}
-  {KeywordSubstitute}
-  ({Token.stem=="съответ"})?
-  {KeywordWith}
-  {Token.string=="„"}
-  ({Token})+
-  {Token.string=="“"}
-  ):ruleMatch
--->
-  :ruleMatch.RuleSubstituteShort = {rule = "RuleSubstituteShort"}

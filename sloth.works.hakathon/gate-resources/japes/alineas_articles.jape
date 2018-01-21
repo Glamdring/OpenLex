@@ -1,18 +1,18 @@
-Phase:	ArticlePrefix
+Phase:	Article
 Input:  Lookup Token DottedNumber
 Options: control = appelt
 
-Rule:ArticlePrefix
+Rule:Article
 Priority: 5
 
 (
  { Lookup.majorType == "article" }
  ( { Token.string == "." } )?
  ( { Token.kind == "number" } ):num
- ( { Token.string== "." } )?
+ ( { Token.string == "." } )?
 ):article
 -->
- :article.ArticlePrefix = { rule = "ArticlePrefix", number = :num.Token.string },
+ :article.Article = { rule = "Article", number = :num.Token.string },
  {
      AnnotationSet tokens = (AnnotationSet) bindings.get("article");
      AnnotationSet dottedNumber = tokens.get("DottedNumber", tokens.firstNode().getOffset(), tokens.lastNode().getOffset());
@@ -20,20 +20,53 @@ Priority: 5
  }
 
 
-Phase: ArticleStart
-Input: ArticlePrefix SpaceToken
+Phase:	ArticleStart
+Input:  Article SpaceToken
 Options: control = appelt
+
 
 Rule:ArticleStart
 Priority: 5
 
 (
-  { SpaceToken.kind=="control" }
-  ( { ArticlePrefix } ):ap
+  { SpaceToken.kind == "control" }
+  ( { Article } ):ap
 ):astart
 
 -->
-:astart.ArticleStart = { rule = "ArticleStart", number = :ap.ArticlePrefix.number }
+:astart.ArticleStart = { rule = "ArticleStart", number = :ap.Article.number }
+
+
+Phase:	ArticleEnd
+Input:  ArticleStart Token
+Options: control = appelt
+
+Rule:ArticleEnd
+Priority: 10
+
+(
+ ( { Token } ):articleEnd
+ { ArticleStart }
+)
+-->
+ :articleEnd.ArticleEnd = { rule = "ArticleEnd" },
+ :articleEnd.AlineaEnd = { rule = "ArticleEnd" }
+
+
+Phase:	ArticleContent
+Input:  ArticleStart Token ArticleEnd DocEnd
+Options: control = first
+
+Rule:ArticleContent
+Priority: 10
+
+(
+ ( { ArticleStart } ):prefix
+ ( { Token } )+
+ ( { ArticleEnd } | { DocEnd })
+):article
+-->
+ :article.ArticleContent = { rule = "ArticleContent", number = :prefix.ArticleStart.number }
 
 
 Phase:	AlineaPrefix
@@ -42,35 +75,47 @@ Options: control = appelt
 
 Rule: AlineaPrefix
 Priority: 10
-
-( { Token } ):alineaEnd
 (
- { Token.string == "(" } { Token.kind == number } { Token.string == ")" }
+ { Token.string == "(" }
+ ({ Token.kind == number }):num
+ { Token.string == ")" }
 ):alinea
 -->
- :alinea.AlineaPrefix = { rule = "AlineaPrefix" },
- :alineaEnd.AlineaEnd = { rule = "AlineaEnd" }
+ :alinea.AlineaPrefix = { rule = "AlineaPrefix" , number = :num.Token.string }
 
 
-Phase:	AlineaPrefix2
-Input:  DottedNumber Token
+Phase:	AlineaStart
+Input:  AlineaPrefix SpaceToken
 Options: control = appelt
 
-Rule: AlineaPrefix2
+Rule: AlineaStart
 Priority: 10
 
 (
- ( { Token } ):alineaEnd
- ( { DottedNumber } ):ap
+ ( { SpaceToken.kind == "control" } ):alineaEnd
+ ( { AlineaPrefix } ):ap
 )
 -->
- :ap.AlineaPrefix = { rule = "AlineaPrefix2" , number = :ap.DottedNumber.number },
- {
-     AnnotationSet tokens = (AnnotationSet) bindings.get("ap");
-     AnnotationSet dottedNumber = tokens.get("DottedNumber", tokens.firstNode().getOffset(), tokens.lastNode().getOffset());
-     inputAS.removeAll(dottedNumber);
- },
- :alineaEnd.AlineaEnd = { rule = "AlineaEnd" }
+:ap.AlineaStart = { rule = "AlineaStart" , number = :ap.AlineaPrefix.number },
+:alineaEnd.AlineaEnd = { rule = "AlineaStart" },
+:alineaEnd.PointEnd = { rule = "AlineaStart" }
+
+
+Phase:	AlineaStart
+Input:  AlineaPrefix ArticleStart
+Options: control = appelt
+
+Rule: AlineaStart2
+Priority: 10
+
+(
+ ( { ArticleStart } ):alineaEnd
+ ( { AlineaPrefix } ):ap
+)
+-->
+:ap.AlineaStart = { rule = "AlineaStart2" , number = :ap.AlineaPrefix.number },
+:alineaEnd.AlineaEnd = { rule = "AlineaStart2" },
+:alineaEnd.PointEnd = { rule = "AlineaStart2" }
 
 
 Phase:	AlineaContent
@@ -88,51 +133,33 @@ Priority: 10
  :alinea.AlineaContent = { rule = "AlineaContent" , number = :prefix.AlineaStart.number }
 
 
-Phase:	ArticleEnd
-Input:  ArticlePrefix Token
+Phase:	PointStart
+Input:  DottedNumber SpaceToken
 Options: control = appelt
 
-Rule:ArticleEnd
+Rule: PointStart
 Priority: 10
 
 (
- ( { Token } ):articleEnd
- { ArticlePrefix }
-)
+ ( { SpaceToken.kind == "control" } ):pointEnd
+ ( { DottedNumber } ):num
+):ps
 -->
- :articleEnd.ArticleEnd = { rule = "ArticleEnd" },
- :articleEnd.AlineaEnd = { rule = "ArticleEnd" }
+ :ps.PointStart = { rule = "PointStart" , number = :num.DottedNumber.number },
+ :pointEnd.PointEnd = { rule = "PointStart" }
 
 
+Phase:	PointContent
+Input:  PointStart PointEnd ArticleEnd AlineaEnd
+Options: control = all
 
-Phase:	ArticleContent
-Input:  ArticlePrefix Token ArticleEnd DocEnd
-Options: control = first
-
-Rule:ArticleContent
+Rule: PointContent
 Priority: 10
 
 (
- ( { ArticlePrefix } ):prefix
- ( { Token } )+
- ( { ArticleEnd } | { DocEnd })
-):article
+   ( { PointStart } ):ps
+   ( { PointEnd } | { AlineaEnd } )
+):pc
 -->
- :article.ArticleContent = { rule = "ArticleContent", number = :prefix.ArticlePrefix.number }
+ :pc.PointContent = { rule = "PointContent" , number = :ps.PointStart.number }
 
-
-Phase: NumberedChapter
-Input: Chapter Counting Token
-Options: control = first
-
-Rule: NumberedChapter
-Priority: 10
-(
- ( { Chapter }
-   { Counting } )
- |
- ( { Counting }
-   { Chapter } )
-):nc
--->
- :nc.NumberedChapter = { rule = "NumberedChapter" }

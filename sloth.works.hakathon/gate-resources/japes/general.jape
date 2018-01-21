@@ -63,3 +63,20 @@ Rule: DocEnd
  		throw new RuntimeException(e);
  	}
 }
+
+
+Phase: NumberedChapter
+Input: Chapter Counting Token
+Options: control = first
+
+Rule: NumberedChapter
+Priority: 10
+(
+ ( { Chapter }
+   { Counting } )
+ |
+ ( { Counting }
+   { Chapter } )
+):nc
+-->
+ :nc.NumberedChapter = { rule = "NumberedChapter" }

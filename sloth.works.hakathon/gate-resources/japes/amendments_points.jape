@@ -1,5 +1,5 @@
 Phase:	AmendmentPrefix
-Input:  Lookup Token DottedNumber
+Input:  Token DottedNumber
 Options: control = appelt
 
 Rule:AmendmentPrefix
@@ -7,7 +7,7 @@ Priority: 10
 
 (
  (
-   { Lookup.majorType == "amendment" }
+   { Token.string == "§" }
    { DottedNumber }
  )
 ):amendment
@@ -18,6 +18,51 @@ Priority: 10
      AnnotationSet dottedNumber = tokens.get("DottedNumber", tokens.firstNode().getOffset(), tokens.lastNode().getOffset());
      inputAS.removeAll(dottedNumber);
  }
+
+
+Phase:	AmendmentEnd
+Input:  AmendmentPrefix Token
+Options: control = appelt
+
+Rule:AmendmentEnd
+Priority: 10
+
+(
+ ( { Token } ):amendmentEnd
+ { AmendmentPrefix }
+)
+-->
+ :amendmentEnd.AmendmentEnd = { rule = "AmendmentEnd" }
+
+
+Phase:	AmendmentText
+Input:  AmendmentPrefix AmendmentEnd DocEnd
+Options: control = all
+
+Rule:AmendmentText
+Priority: 10
+
+(
+ { AmendmentPrefix }
+ ( { AmendmentEnd } | { DocEnd } )
+):amendment
+-->
+ :amendment.AmendmentText = { rule = "AmendmentText" }
+
+
+Phase:	AmendmentContent
+Input:  AmendmentPrefix AmendmentEnd DocEnd
+Options: control = all
+
+Rule:AmendmentContent
+Priority: 10
+
+(
+ { AmendmentPrefix }
+ ( { AmendmentEnd } | { DocEnd } )
+):amendment
+-->
+ :amendment.AmendmentContent = { rule = "AmendmentContent" }
 
 
 Phase:	PointPrefix
@@ -56,52 +101,3 @@ Priority: 10
   :point.PointContent = { rule = "PointContent" }
 
 
-Phase:	AmendmentEnd
-Input:  AmendmentPrefix Token
-Options: control = appelt
-
-Rule:AmendmentEnd
-Priority: 10
-
-(
- ( { Token } ):amendmentEnd
- { AmendmentPrefix }
-)
--->
- :amendmentEnd.AmendmentEnd = { rule = "AmendmentEnd" }
-
-
-Phase:	AmendmentText
-Input:  AmendmentPrefix Token PointPrefix DocEnd
-Options: control = first
-
-Rule:AmendmentText
-Priority: 10
-
-(
- (
- { AmendmentPrefix }
- ( { Token } )+
- ):amendment
- ( { PointPrefix } | { AmendmentPrefix} | { DocEnd } )
-)
--->
- :amendment.AmendmentText = { rule = "AmendmentText" }
-
-
- Phase:	AmendmentContent
- Input:  AmendmentPrefix PointContent AmendmentEnd DocEnd
- Options: control = first
-
- Rule:AmendmentContent
- Priority: 10
-
- (
-  (
-  { AmendmentPrefix }
-  ( { PointContent } )+
-  ):amendment
-  ( { AmendmentEnd } | { DocEnd } )
- )
- -->
-  :amendment.AmendmentContent = { rule = "AmendmentContent" }
