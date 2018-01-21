@@ -8,7 +8,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created by mateva on 21.01.18.
@@ -38,11 +38,25 @@ public class AnnotatedCorpusReader {
 
             List annotatedAmendmentsLrIds = annotatedAmendments.getLrIds(DOC_IMPL_CLASS);
 
+            Set<Diff> diffs = new HashSet<>();
+
             for (Object id : annotatedAmendmentsLrIds) {
                 Document d = readDocumentFrom(annotatedAmendments, id);
 
                 for (Annotation a : d.getAnnotations().get("RuleSubstitute")) {
-                    System.out.println(a);
+                    FeatureMap map = a.getFeatures();
+                    String alNum = (String) map.get("alinea_number");
+                    String articleNum = (String) map.get("article_number");
+                    String what = (String) map.get("what");
+                    String withWhat = (String) map.get("withWhat");
+
+                    Diff diff = new Diff(alNum, articleNum, what, withWhat, d);
+                    diffs.add(diff);
+
+                    System.out.println(alNum);
+                    System.out.println(articleNum);
+                    System.out.println(what);
+                    System.out.println(withWhat);
                 }
 
                 Factory.deleteResource(d);
@@ -54,15 +68,35 @@ public class AnnotatedCorpusReader {
             for (Object id : lawsDocIds) {
                 Document d = readDocumentFrom(annotatedLaws, id);
 
-                writeOriginalFile(d);
-                d.getAnnotations().get("NumberedChapter");
-//                try {
-//                    d.getAnnotations();
-//                } catch (XMLStreamException | IOException ioe) {
-//                    handleFuckingException(ioe);
-//                } finally {
-                    Factory.deleteResource(d);
-            //    }
+                String originalContent = d.getContent().toString();
+                String name = d.getName();
+                writeContentTOFileAtPath(originalContent, PATH_TO_ORIGINAL_OUTPUT + name);
+
+                AnnotationSet alineaContents = d.getAnnotations().get("AlineaContent");
+
+                Map<String, String> changed = new HashMap<>();
+                for (Diff diff : diffs)  {
+
+                    for (Annotation alineaContent : alineaContents) {
+                        FeatureMap features = alineaContent.getFeatures();
+                        if (diff.getAlNum().equals(features.get("number"))
+                                && diff.getArticleNum().equals(features.get("article_number"))) {
+                            System.out.println("Match!");
+                        }
+                        String tosub = getPartOfDocument(d, alineaContent.getStartNode().getOffset(),
+                                alineaContent.getEndNode().getOffset());
+                        String newVer = tosub.replaceAll(diff.getWhat(), diff.getWithWhat());
+                        changed.put(tosub, newVer);
+                    }
+
+                }
+                for (Map.Entry<String, String> entry : changed.entrySet()) {
+                    originalContent = originalContent.replace(entry.getKey(), entry.getValue());
+                }
+
+                writeContentTOFileAtPath(originalContent, PATH_TO_RESULT_OUTPUT + name);
+                Factory.deleteResource(d);
+
             }
 
         } catch (GateException e) {
