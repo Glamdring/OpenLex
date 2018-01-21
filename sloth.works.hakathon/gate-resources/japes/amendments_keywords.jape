@@ -25,6 +25,8 @@ Priority: 10
 { Token.stem=="текст" }
 |
 { Token.stem=="думит" }
+|
+{ Token.stem=="думат" }
 ):word
 -->
  :word.KeywordText = {rule = "KeywordText"}

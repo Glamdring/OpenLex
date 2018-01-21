@@ -24,7 +24,6 @@ Phase:	ArticleStart
 Input:  Article SpaceToken
 Options: control = appelt
 
-
 Rule:ArticleStart
 Priority: 5
 
@@ -54,7 +53,7 @@ Priority: 10
 
 
 Phase:	ArticleContent
-Input:  ArticleStart Token ArticleEnd DocEnd
+Input:  ArticleStart ArticleEnd DocEnd
 Options: control = first
 
 Rule:ArticleContent
@@ -62,8 +61,7 @@ Priority: 10
 
 (
  ( { ArticleStart } ):prefix
- ( { Token } )+
- ( { ArticleEnd } | { DocEnd })
+ ( { ArticleEnd } | { DocEnd } )
 ):article
 -->
  :article.ArticleContent = { rule = "ArticleContent", number = :prefix.ArticleStart.number }
@@ -133,6 +131,32 @@ Priority: 10
  :alinea.AlineaContent = { rule = "AlineaContent" , number = :prefix.AlineaStart.number }
 
 
+Phase:	AlineaAddArticleNumber
+Input:  AlineaContent
+Options: control = appelt
+
+Rule: AlineaAddArticleNumber
+Priority: 10
+
+(
+ { AlineaContent }
+):alinea
+-->
+{
+ AnnotationSet alineaContent = bindings.get("alinea");
+ Annotation alineaCont = alineaContent.iterator().next();
+
+ AnnotationSet subset = inputAS.getCovering("ArticleContent", alineaCont.getStartNode().getOffset(),
+         alineaCont.getEndNode().getOffset());
+ if (!subset.isEmpty()) {
+     Annotation article = subset.iterator().next();
+     FeatureMap features = alineaCont.getFeatures();
+     features.put("article_number", article.getFeatures().get("number"));
+ }
+ }
+
+
+
 Phase:	PointStart
 Input:  DottedNumber SpaceToken
 Options: control = appelt
@@ -158,8 +182,38 @@ Priority: 10
 
 (
    ( { PointStart } ):ps
-   ( { PointEnd } | { AlineaEnd } )
+   ( { PointEnd } )
 ):pc
 -->
  :pc.PointContent = { rule = "PointContent" , number = :ps.PointStart.number }
 
+Phase:	PointAddArticleNumber
+Input:  AlineaContent PointContent
+Options: control = all
+
+Rule: PointAddArticleNumber
+Priority: 10
+
+(
+ { PointContent }
+):point
+-->
+{
+        AnnotationSet pointContent = bindings.get("point");
+        Annotation pointCont = pointContent.iterator().next();
+
+        AnnotationSet subset = inputAS.getCovering("AlineaContent", pointCont.getStartNode().getOffset(),
+                pointCont.getEndNode().getOffset());
+        if (!subset.isEmpty()) {
+            Annotation alinea = subset.iterator().next();
+            FeatureMap features = pointCont.getFeatures();
+            features.put("alinea_number", alinea.getFeatures().get("number"));
+        }
+        AnnotationSet subset2 = inputAS.getCovering("ArticleContent", pointCont.getStartNode().getOffset(),
+                pointCont.getEndNode().getOffset());
+        if (!subset2.isEmpty()) {
+            Annotation article = subset2.iterator().next();
+            FeatureMap features = pointCont.getFeatures();
+            features.put("article_number", article.getFeatures().get("number"));
+        }
+}

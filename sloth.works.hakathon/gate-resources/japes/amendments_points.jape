@@ -32,7 +32,8 @@ Priority: 10
  { AmendmentPrefix }
 )
 -->
- :amendmentEnd.AmendmentEnd = { rule = "AmendmentEnd" }
+ :amendmentEnd.AmendmentEnd = { rule = "AmendmentEnd" },
+ :amendmentEnd.AmendmentPointEnd = { rule = "AmendmentEnd" }
 
 
 Phase:	AmendmentText
@@ -65,11 +66,11 @@ Priority: 10
  :amendment.AmendmentContent = { rule = "AmendmentContent" }
 
 
-Phase:	PointPrefix
+Phase:	AmendmentPointPrefix
 Input:  DottedNumber Token
 Options: control = appelt
 
-Rule: PointPrefix
+Rule: AmendmentPointPrefix
 Priority: 10
 
 (
@@ -77,27 +78,40 @@ Priority: 10
   ( { DottedNumber } ):ap
 )
 -->
- :ap.PointPrefix = {rule = "PointPrefix"},
+ :ap.AmendmentPointPrefix = {rule = "AmendmentPointPrefix"},
  {
      AnnotationSet tokens = (AnnotationSet) bindings.get("ap");
      AnnotationSet dottedNumber = tokens.get("DottedNumber", tokens.firstNode().getOffset(), tokens.lastNode().getOffset());
      inputAS.removeAll(dottedNumber);
  },
- :pointEnd.PointEnd = {rule = "PointEnd"}
+ :pointEnd.AmendmentPointEnd = {rule = "AmendmentPointEnd"}
 
 
-Phase:	PointContent
-Input:  PointPrefix PointEnd DocEnd
+Phase:	AmendmentPointContent
+Input:  AmendmentPointPrefix AmendmentPointEnd DocEnd
 Options: control = appelt
 
-Rule:PointContent
+Rule:AmendmentPointContent
 Priority: 10
 
 (
-  { PointPrefix }
-  ( { PointEnd } | { DocEnd } )
+  { AmendmentPointPrefix }
+  ( { AmendmentPointEnd } | { DocEnd } )
 ):point
 -->
-  :point.PointContent = { rule = "PointContent" }
+  :point.AmendmentPointContent = { rule = "AmendmentPointContent" }
 
 
+Phase:	AmendmentCoverage
+Input:  AmendmentPrefix AmendmentEnd KeywordIn
+Options: control = all
+
+Rule:AmendmentContent
+Priority: 10
+
+(
+ { AmendmentPrefix }
+ ( { AmendmentEnd } | { DocEnd } )
+):amendment
+-->
+ :amendment.AmendmentContent = { rule = "AmendmentContent" }

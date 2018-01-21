@@ -1,9 +1,6 @@
 package org.openlex.experiments.io;
 
-import gate.DataStore;
-import gate.Document;
-import gate.Factory;
-import gate.Gate;
+import gate.*;
 import gate.util.GateException;
 import gate.util.InvalidOffsetException;
 
@@ -36,8 +33,21 @@ public class AnnotatedCorpusReader {
         DataStore annotatedLaws = null;
         DataStore annotatedAmendments = null;
         try {
-            annotatedLaws = Factory.openDataStore(DATA_STORE_CLASS, PATH_TO_FILE_RESOURCES + "ds");
-            annotatedAmendments = Factory.openDataStore(DATA_STORE_CLASS, PATH_TO_FILE_RESOURCES + "amendments");
+            annotatedLaws = Factory.openDataStore(DATA_STORE_CLASS, PATH_TO_FILE_RESOURCES + "laws");
+            annotatedAmendments = Factory.openDataStore(DATA_STORE_CLASS, PATH_TO_FILE_RESOURCES + "amends");
+
+            List annotatedAmendmentsLrIds = annotatedAmendments.getLrIds(DOC_IMPL_CLASS);
+
+            for (Object id : annotatedAmendmentsLrIds) {
+                Document d = readDocumentFrom(annotatedAmendments, id);
+
+                for (Annotation a : d.getAnnotations().get("RuleSubstitute")) {
+                    System.out.println(a);
+                }
+
+                Factory.deleteResource(d);
+                //    }
+            }
 
             List lawsDocIds = annotatedLaws.getLrIds(DOC_IMPL_CLASS);
 
