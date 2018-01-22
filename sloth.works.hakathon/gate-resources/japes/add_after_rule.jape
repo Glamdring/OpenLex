@@ -1,0 +1,56 @@
+Phase:	RuleAddAfter
+Input:  AlineaArticleMention KeywordText KeywordAfter KeywordWith KeywordIn KeywordAdd Token
+Options: control = first
+
+Rule:SubstituteRule
+Priority: 10
+(
+  {KeywordIn}
+  ({AlineaArticleMention}):aam
+  {KeywordAfter}
+  {KeywordText}
+  ({Token.string=="„"}):startA
+  ({Token})+
+  ({Token.string=="“"}):endA
+  {Token.stem=="се"}
+  {KeywordAdd}
+  ({Token.string=="„"}):startB
+  ({Token})+
+  ({Token.string=="“"}):endB
+):ruleMatch
+-->
+{
+        AnnotationSet rule = bindings.get("ruleMatch");
+
+        AnnotationSet articleAlineaMention = bindings.get("aam");
+        Annotation aaMention = articleAlineaMention.iterator().next();
+
+        AnnotationSet startA = bindings.get("startA");
+        Annotation startAPoint = startA.iterator().next();
+
+        AnnotationSet endA = bindings.get("endA");
+        Annotation endAPoint = endA.iterator().next();
+
+        AnnotationSet startB = bindings.get("startB");
+        Annotation startBPoint = startB.iterator().next();
+
+        AnnotationSet endB = bindings.get("endB");
+        Annotation endBPoint = endB.iterator().next();
+
+        try {
+            FeatureMap features = Factory.newFeatureMap();
+            features.put("textA", gate.Utils.cleanStringFor(doc, startAPoint.getEndNode().getOffset(),
+                    endAPoint.getStartNode().getOffset()));
+            features.put("textB", gate.Utils.cleanStringFor(doc, startBPoint.getEndNode().getOffset(),
+                    endBPoint.getStartNode().getOffset()));
+
+            features.put("article_number", aaMention.getFeatures().get("article_number"));
+            features.put("alinea_number", aaMention.getFeatures().get("alinea_number"));
+
+            features.put("rule", "RuleAddAfter");
+            outputAS.add(rule.firstNode().getOffset(), rule.lastNode().getOffset(), "RuleAddAfter", features);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+}

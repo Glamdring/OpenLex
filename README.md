@@ -22,4 +22,4 @@ OpenLex цели създаването на машинно четима вер�
  - [RDF for Legislation, Gov UK](https://www.legislation.gov.uk/developer/formats/rdf)
  - [Open Legislation docs](http://openlegislation.readthedocs.io/en/latest/)
  - [LEOS, European Commission](https://ec.europa.eu/isa2/solutions/leos_en)
- 
+ - [GATE](https://gate.ac.uk/overview.html)

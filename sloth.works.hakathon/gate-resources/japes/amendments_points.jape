@@ -1,0 +1,117 @@
+Phase:	AmendmentPrefix
+Input:  Token DottedNumber
+Options: control = appelt
+
+Rule:AmendmentPrefix
+Priority: 10
+
+(
+ (
+   { Token.string == "§" }
+   { DottedNumber }
+ )
+):amendment
+-->
+ :amendment.AmendmentPrefix = { rule = "AmendmentPrefix" },
+ {
+     AnnotationSet tokens = (AnnotationSet) bindings.get("amendment");
+     AnnotationSet dottedNumber = tokens.get("DottedNumber", tokens.firstNode().getOffset(), tokens.lastNode().getOffset());
+     inputAS.removeAll(dottedNumber);
+ }
+
+
+Phase:	AmendmentEnd
+Input:  AmendmentPrefix Token
+Options: control = appelt
+
+Rule:AmendmentEnd
+Priority: 10
+
+(
+ ( { Token } ):amendmentEnd
+ { AmendmentPrefix }
+)
+-->
+ :amendmentEnd.AmendmentEnd = { rule = "AmendmentEnd" },
+ :amendmentEnd.AmendmentPointEnd = { rule = "AmendmentEnd" }
+
+
+Phase:	AmendmentText
+Input:  AmendmentPrefix AmendmentEnd DocEnd
+Options: control = all
+
+Rule:AmendmentText
+Priority: 10
+
+(
+ { AmendmentPrefix }
+ ( { AmendmentEnd } | { DocEnd } )
+):amendment
+-->
+ :amendment.AmendmentText = { rule = "AmendmentText" }
+
+
+Phase:	AmendmentContent
+Input:  AmendmentPrefix AmendmentEnd DocEnd
+Options: control = all
+
+Rule:AmendmentContent
+Priority: 10
+
+(
+ { AmendmentPrefix }
+ ( { AmendmentEnd } | { DocEnd } )
+):amendment
+-->
+ :amendment.AmendmentContent = { rule = "AmendmentContent" }
+
+
+Phase:	AmendmentPointPrefix
+Input:  DottedNumber Token
+Options: control = appelt
+
+Rule: AmendmentPointPrefix
+Priority: 10
+
+(
+  ( { Token } ):pointEnd
+  ( { DottedNumber } ):ap
+)
+-->
+ :ap.AmendmentPointPrefix = {rule = "AmendmentPointPrefix"},
+ {
+     AnnotationSet tokens = (AnnotationSet) bindings.get("ap");
+     AnnotationSet dottedNumber = tokens.get("DottedNumber", tokens.firstNode().getOffset(), tokens.lastNode().getOffset());
+     inputAS.removeAll(dottedNumber);
+ },
+ :pointEnd.AmendmentPointEnd = {rule = "AmendmentPointEnd"}
+
+
+Phase:	AmendmentPointContent
+Input:  AmendmentPointPrefix AmendmentPointEnd DocEnd
+Options: control = appelt
+
+Rule:AmendmentPointContent
+Priority: 10
+
+(
+  { AmendmentPointPrefix }
+  ( { AmendmentPointEnd } | { DocEnd } )
+):point
+-->
+  :point.AmendmentPointContent = { rule = "AmendmentPointContent" }
+
+
+Phase:	AmendmentCoverage
+Input:  AmendmentPrefix AmendmentEnd KeywordIn
+Options: control = all
+
+Rule:AmendmentContent
+Priority: 10
+
+(
+ { AmendmentPrefix }
+ ( { AmendmentEnd } | { DocEnd } )
+):amendment
+-->
+ :amendment.AmendmentContent = { rule = "AmendmentContent" }

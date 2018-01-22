@@ -1,0 +1,201 @@
+Phase:	KeywordWord
+Input:  Token
+Options: control = appelt
+
+Rule:KeywordWord
+Priority: 10
+
+(
+{ Token.stem=="дума" }
+|
+{ Token.stem=="думат" }
+):word
+-->
+ :word.KeywordWord = {rule = "KeywordWord"}
+ 
+ 
+Phase:	KeywordText
+Input:  Token
+Options: control = appelt
+
+Rule:KeywordText
+Priority: 10
+
+(
+{ Token.stem=="текст" }
+|
+{ Token.stem=="думит" }
+|
+{ Token.stem=="думат" }
+):word
+-->
+ :word.KeywordText = {rule = "KeywordText"}
+
+
+Phase:	KeywordCreate
+Input:  Token
+Options: control = appelt
+
+Rule:KeywordCreate
+Priority: 10
+
+(
+{ Token.stem=="създав" }
+):word
+-->
+:word.KeywordCreate = {rule = "KeywordCreate"}
+
+
+Phase:	KeywordChange
+Input:  Token
+Options: control = appelt
+
+Rule:KeywordChange
+Priority: 10
+
+(
+{ Token.stem=="измен" }
+|
+{ Token.stem=="промен" }
+):word
+-->
+:word.KeywordChange = {rule = "KeywordChange"}
+
+
+Phase:	KeywordAdd
+Input:  Token
+Options: control = appelt
+
+Rule:KeywordAdd
+Priority: 10
+
+(
+{ Token.stem=="добав" }
+|
+{ Token.stem=="прибав" }
+):word
+-->
+:word.KeywordAdd = {rule = "KeywordAdd"}
+
+
+Phase:	KeywordSubstitute
+Input:  Token
+Options: control = appelt
+
+Rule:KeywordSubstitute
+Priority: 10
+
+(
+{ Token.stem=="замен" }
+):word
+-->
+:word.KeywordSubstitute = {rule = "KeywordSubstitute"}
+
+
+Phase:	KeywordRevoke
+Input:  Token
+Options: control = appelt
+
+Rule:KeywordRevoke
+Priority: 10
+
+(
+{ Token.stem=="отмен" }
+|
+{ Token.stem=="заличав" }
+):word
+-->
+:word.KeywordRevoke = {rule = "KeywordRevoke"}
+
+
+Phase:	KeywordWith
+Input:  Token
+Options: control = appelt
+
+Rule:KeywordWith
+Priority: 10
+
+(
+{ Token.stem=="с" }
+|
+{ Token.stem=="със" }
+):word
+-->
+:word.KeywordWith = {rule = "KeywordWith"}
+
+
+Phase:	KeywordIn
+Input:  Token
+Options: control = appelt
+
+Rule:KeywordIn
+Priority: 10
+
+(
+{ Token.stem=="в" }
+):word
+-->
+:word.KeywordIn = {rule = "KeywordIn"}
+
+
+Phase:	KeywordAfter
+Input:  Token
+Options: control = appelt
+
+Rule:KeywordAfter
+Priority: 10
+
+(
+{ Token.stem=="след" }
+):word
+-->
+:word.KeywordAfter = {rule = "KeywordAfter"}
+
+
+Phase:	ArticleMention
+Input:  Lookup Token
+Options: control = appelt
+
+Rule:ArticleMention
+Priority: 10
+
+(
+{Lookup.majorType=="article"}
+({Token.string=="."})?
+({Token.kind=="number"}):num
+({Token.string=="."})?
+):article
+-->
+:article.ArticleMention = {rule = "ArticleMention", number=:num.Token.string}
+
+
+Phase:	AlineaMention
+Input:  Lookup Token
+Options: control = appelt
+
+Rule: AlineaMention
+Priority: 10
+(
+{Lookup.majorType=="alinea"}
+({Token.string=="."})?
+({Token.kind=="number"}):num
+({Token.string=="."})?
+):alinea
+-->
+:alinea.AlineaMention = {rule = "AlineaMention", number=:num.Token.string}
+
+
+Phase: AlineaArticleMention
+Input: AlineaMention ArticleMention Token
+Options: control = appelt
+
+Rule: AlineaArticleMention
+Priority: 10
+
+(
+({ArticleMention}):article
+{Token.string==","}
+({AlineaMention}):alinea
+):am
+-->
+:am.AlineaArticleMention = {rule = "AlineaArticleMention", alinea_number=:alinea.AlineaMention.number, article_number=:article.ArticleMention.number}

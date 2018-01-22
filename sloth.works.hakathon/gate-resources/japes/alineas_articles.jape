@@ -1,0 +1,219 @@
+Phase:	Article
+Input:  Lookup Token DottedNumber
+Options: control = appelt
+
+Rule:Article
+Priority: 5
+
+(
+ { Lookup.majorType == "article" }
+ ( { Token.string == "." } )?
+ ( { Token.kind == "number" } ):num
+ ( { Token.string == "." } )?
+):article
+-->
+ :article.Article = { rule = "Article", number = :num.Token.string },
+ {
+     AnnotationSet tokens = (AnnotationSet) bindings.get("article");
+     AnnotationSet dottedNumber = tokens.get("DottedNumber", tokens.firstNode().getOffset(), tokens.lastNode().getOffset());
+     inputAS.removeAll(dottedNumber);
+ }
+
+
+Phase:	ArticleStart
+Input:  Article SpaceToken
+Options: control = appelt
+
+Rule:ArticleStart
+Priority: 5
+
+(
+  { SpaceToken.kind == "control" }
+  ( { Article } ):ap
+):astart
+
+-->
+:astart.ArticleStart = { rule = "ArticleStart", number = :ap.Article.number }
+
+
+Phase:	ArticleEnd
+Input:  ArticleStart Token
+Options: control = appelt
+
+Rule:ArticleEnd
+Priority: 10
+
+(
+ ( { Token } ):articleEnd
+ { ArticleStart }
+)
+-->
+ :articleEnd.ArticleEnd = { rule = "ArticleEnd" },
+ :articleEnd.AlineaEnd = { rule = "ArticleEnd" }
+
+
+Phase:	ArticleContent
+Input:  ArticleStart ArticleEnd DocEnd
+Options: control = first
+
+Rule:ArticleContent
+Priority: 10
+
+(
+ ( { ArticleStart } ):prefix
+ ( { ArticleEnd } | { DocEnd } )
+):article
+-->
+ :article.ArticleContent = { rule = "ArticleContent", number = :prefix.ArticleStart.number }
+
+
+Phase:	AlineaPrefix
+Input:  Token Lookup
+Options: control = appelt
+
+Rule: AlineaPrefix
+Priority: 10
+(
+ { Token.string == "(" }
+ ({ Token.kind == number }):num
+ { Token.string == ")" }
+):alinea
+-->
+ :alinea.AlineaPrefix = { rule = "AlineaPrefix" , number = :num.Token.string }
+
+
+Phase:	AlineaStart
+Input:  AlineaPrefix SpaceToken
+Options: control = appelt
+
+Rule: AlineaStart
+Priority: 10
+
+(
+ ( { SpaceToken.kind == "control" } ):alineaEnd
+ ( { AlineaPrefix } ):ap
+)
+-->
+:ap.AlineaStart = { rule = "AlineaStart" , number = :ap.AlineaPrefix.number },
+:alineaEnd.AlineaEnd = { rule = "AlineaStart" },
+:alineaEnd.PointEnd = { rule = "AlineaStart" }
+
+
+Phase:	AlineaStart
+Input:  AlineaPrefix ArticleStart
+Options: control = appelt
+
+Rule: AlineaStart2
+Priority: 10
+
+(
+ ( { ArticleStart } ):alineaEnd
+ ( { AlineaPrefix } ):ap
+)
+-->
+:ap.AlineaStart = { rule = "AlineaStart2" , number = :ap.AlineaPrefix.number },
+:alineaEnd.AlineaEnd = { rule = "AlineaStart2" },
+:alineaEnd.PointEnd = { rule = "AlineaStart2" }
+
+
+Phase:	AlineaContent
+Input:  AlineaStart AlineaEnd DocEnd
+Options: control = appelt
+
+Rule:AlineaContent
+Priority: 10
+
+(
+ ( { AlineaStart } ):prefix
+ ( { AlineaEnd } | { DocEnd } )
+):alinea
+-->
+ :alinea.AlineaContent = { rule = "AlineaContent" , number = :prefix.AlineaStart.number }
+
+
+Phase:	AlineaAddArticleNumber
+Input:  AlineaContent
+Options: control = appelt
+
+Rule: AlineaAddArticleNumber
+Priority: 10
+
+(
+ { AlineaContent }
+):alinea
+-->
+{
+ AnnotationSet alineaContent = bindings.get("alinea");
+ Annotation alineaCont = alineaContent.iterator().next();
+
+ AnnotationSet subset = inputAS.getCovering("ArticleContent", alineaCont.getStartNode().getOffset(),
+         alineaCont.getEndNode().getOffset());
+ if (!subset.isEmpty()) {
+     Annotation article = subset.iterator().next();
+     FeatureMap features = alineaCont.getFeatures();
+     features.put("article_number", article.getFeatures().get("number"));
+ }
+ }
+
+
+
+Phase:	PointStart
+Input:  DottedNumber SpaceToken
+Options: control = appelt
+
+Rule: PointStart
+Priority: 10
+
+(
+ ( { SpaceToken.kind == "control" } ):pointEnd
+ ( { DottedNumber } ):num
+):ps
+-->
+ :ps.PointStart = { rule = "PointStart" , number = :num.DottedNumber.number },
+ :pointEnd.PointEnd = { rule = "PointStart" }
+
+
+Phase:	PointContent
+Input:  PointStart PointEnd ArticleEnd AlineaEnd
+Options: control = all
+
+Rule: PointContent
+Priority: 10
+
+(
+   ( { PointStart } ):ps
+   ( { PointEnd } )
+):pc
+-->
+ :pc.PointContent = { rule = "PointContent" , number = :ps.PointStart.number }
+
+Phase:	PointAddArticleNumber
+Input:  AlineaContent PointContent
+Options: control = all
+
+Rule: PointAddArticleNumber
+Priority: 10
+
+(
+ { PointContent }
+):point
+-->
+{
+        AnnotationSet pointContent = bindings.get("point");
+        Annotation pointCont = pointContent.iterator().next();
+
+        AnnotationSet subset = inputAS.getCovering("AlineaContent", pointCont.getStartNode().getOffset(),
+                pointCont.getEndNode().getOffset());
+        if (!subset.isEmpty()) {
+            Annotation alinea = subset.iterator().next();
+            FeatureMap features = pointCont.getFeatures();
+            features.put("alinea_number", alinea.getFeatures().get("number"));
+        }
+        AnnotationSet subset2 = inputAS.getCovering("ArticleContent", pointCont.getStartNode().getOffset(),
+                pointCont.getEndNode().getOffset());
+        if (!subset2.isEmpty()) {
+            Annotation article = subset2.iterator().next();
+            FeatureMap features = pointCont.getFeatures();
+            features.put("article_number", article.getFeatures().get("number"));
+        }
+}

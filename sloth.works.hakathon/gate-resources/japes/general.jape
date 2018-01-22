@@ -1,0 +1,82 @@
+Phase:	NewLine
+Input:  SpaceToken
+Options: control = appelt
+
+Rule:NewLine
+Priority: 10
+
+(
+  { SpaceToken.string == "\n" }
+):nl
+-->
+  :nl.NewLine = { rule = "NewLine" }
+
+
+Phase:	DottedNumber
+Input:  Token
+Options: control = appelt
+
+Rule:DottedNumber
+Priority: 10
+
+(
+  ( { Token.kind=="number" } ):num
+  { Token.string=="." }
+):dn
+-->
+  :dn.DottedNumber = { rule = "DottedNumber" , number = :num.Token.string }
+
+
+Phase:	Counting
+Input:  Lookup
+Options: control = appelt
+
+Rule:Counting
+Priority: 10
+
+(
+  { Lookup.majorType == "counting" }
+):law
+-->
+  :law.Counting = { rule = "Counting" }
+
+
+Phase: DocEnd
+Input: Token
+Options: control = once
+
+Rule: DocEnd
+(
+  { Token }
+):tok
+ -->
+{
+ 	AnnotationSet tokens = (AnnotationSet) bindings.get("tok");
+ 	Long globalEnd = (long) inputAS.lastNode().getOffset();
+ 	Long start = globalEnd - 1;
+
+ 	FeatureMap features = Factory.newFeatureMap();
+ 	features.put("rule", "DocEnd");
+ 	try{
+ 		outputAS.add(start, globalEnd, "DocEnd", features);
+ 	} catch (InvalidOffsetException e) {
+ 		throw new RuntimeException(e);
+ 	}
+}
+
+
+Phase: NumberedChapter
+Input: Chapter Counting Token
+Options: control = first
+
+Rule: NumberedChapter
+Priority: 10
+(
+ ( { Chapter }
+   { Counting } )
+ |
+ ( { Counting }
+   { Chapter } )
+):nc
+-->
+ :nc.NumberedChapter = { rule = "NumberedChapter" }
