@@ -1,13 +1,19 @@
 package org.openlex.experiments.jape;
 
-import gate.*;
-import gate.jape.*;
+import gate.Annotation;
+import gate.AnnotationSet;
+import gate.Factory;
+import gate.FeatureMap;
+import gate.jape.ActionContext;
+import gate.jape.JapeException;
 
 // Import: block code will be embedded here
 class JapeExperiments implements java.io.Serializable, gate.jape.RhsAction {
-    private ActionContext ctx;
+	private static final long serialVersionUID = 7825106315666933111L;
+	private ActionContext ctx;
 
-    public ActionContext getActionContext() {
+    @Override
+	public ActionContext getActionContext() {
         return null;
     }
 
@@ -19,7 +25,8 @@ class JapeExperiments implements java.io.Serializable, gate.jape.RhsAction {
         return null;
     }
 
-    public void doit(
+    @Override
+	public void doit(
             gate.Document doc,
             java.util.Map<java.lang.String, gate.AnnotationSet> bindings,
             gate.AnnotationSet inputAS,
@@ -78,7 +85,8 @@ class JapeExperiments implements java.io.Serializable, gate.jape.RhsAction {
 //        }
     }
 
-    public void setActionContext(ActionContext actionContext) {
+    @Override
+	public void setActionContext(ActionContext actionContext) {
 
     }
 }
