@@ -1,14 +1,24 @@
 package org.openlex.experiments.io;
 
-import gate.*;
-import gate.util.GateException;
-import gate.util.InvalidOffsetException;
-
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import gate.Annotation;
+import gate.AnnotationSet;
+import gate.DataStore;
+import gate.Document;
+import gate.Factory;
+import gate.FeatureMap;
+import gate.Gate;
+import gate.util.GateException;
+import gate.util.InvalidOffsetException;
 
 /**
  * Created by mateva on 21.01.18.
@@ -36,9 +46,9 @@ public class AnnotatedCorpusReader {
             annotatedLaws = Factory.openDataStore(DATA_STORE_CLASS, PATH_TO_FILE_RESOURCES + "laws");
             annotatedAmendments = Factory.openDataStore(DATA_STORE_CLASS, PATH_TO_FILE_RESOURCES + "amends");
 
-            List annotatedAmendmentsLrIds = annotatedAmendments.getLrIds(DOC_IMPL_CLASS);
+			List<?> annotatedAmendmentsLrIds = annotatedAmendments.getLrIds(DOC_IMPL_CLASS);
 
-            Set<Diff> diffs = new HashSet<>();
+			Set<Diff> diffs = new HashSet<>();
 
             for (Object id : annotatedAmendmentsLrIds) {
                 Document d = readDocumentFrom(annotatedAmendments, id);
@@ -60,10 +70,9 @@ public class AnnotatedCorpusReader {
                 }
 
                 Factory.deleteResource(d);
-                //    }
             }
 
-            List lawsDocIds = annotatedLaws.getLrIds(DOC_IMPL_CLASS);
+			List<?> lawsDocIds = annotatedLaws.getLrIds(DOC_IMPL_CLASS);
 
             for (Object id : lawsDocIds) {
                 Document d = readDocumentFrom(annotatedLaws, id);
