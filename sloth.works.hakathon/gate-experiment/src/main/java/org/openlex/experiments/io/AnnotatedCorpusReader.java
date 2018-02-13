@@ -117,7 +117,7 @@ public class AnnotatedCorpusReader {
         try {
             return docs.getContent().getContent(startOffSet, endOffset).toString();
         } catch (InvalidOffsetException e) {
-            handleFuckingException(e);
+            handleAnyException(e);
         }
         return null;
     }
@@ -134,7 +134,7 @@ public class AnnotatedCorpusReader {
             writer.write(content);
             writer.close();
         } catch (IOException e) {
-            handleFuckingException(e);
+            handleAnyException(e);
         }
     }
 
@@ -149,7 +149,7 @@ public class AnnotatedCorpusReader {
         try {
             Gate.init();
         } catch (GateException ge) {
-            handleFuckingException(ge);
+            handleAnyException(ge);
         }
     }
 
@@ -159,12 +159,12 @@ public class AnnotatedCorpusReader {
                     gate.Utils.featureMap(DataStore.DATASTORE_FEATURE_NAME, ds,
                             DataStore.LR_ID_FEATURE_NAME, id));
         } catch (Exception e) {
-            handleFuckingException(e);
+            handleAnyException(e);
         }
         return null;
     }
 
-    private void handleFuckingException(Exception e) {
+    private void handleAnyException(Exception e) {
         System.out.println(e);
     }
 
