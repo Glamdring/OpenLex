@@ -26,7 +26,7 @@ public class ArgsParser implements GATEPathBundle {
 		Option gatePath = new Option("p", "gatepath", true, "GATE path");
 		gatePath.setRequired(true);
 		options.addOption(gatePath);
-		Option resourcePath = new Option("r", "resorcespath", true, "Resources path");
+		Option resourcePath = new Option("r", "resourcespath", true, "Resources path");
 		resourcePath.setRequired(true);
 		options.addOption(resourcePath);
 
@@ -38,9 +38,9 @@ public class ArgsParser implements GATEPathBundle {
 		try {
 			cmd = clp.parse(options, args);
 			pathToGATE = cmd.getOptionValue("gatepath");
-			pathToGATEPlugins = pathToGATE + "/plugins";
+			pathToResources = cmd.getOptionValue("resourcespath");
 
-			pathToResources = cmd.getOptionValue("resorcespath");
+			pathToGATEPlugins = pathToGATE + "/plugins";
 			pathToFileResources = "file:///" + pathToResources;
 			pathToResultOutput = pathToResources + "results/";
 			pathToOriginalOutput = pathToResources + "original/";
@@ -81,10 +81,6 @@ public class ArgsParser implements GATEPathBundle {
 	@Override
 	public String getPathToOriginalOutput() {
 		return pathToOriginalOutput;
-	}
-
-	public String[] getArgs() {
-		return args;
 	}
 
 }

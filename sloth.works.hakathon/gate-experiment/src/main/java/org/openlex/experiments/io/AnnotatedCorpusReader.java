@@ -164,13 +164,37 @@ public class AnnotatedCorpusReader {
 	}
 
 	public static void main(String[] args) {
-		ArgsParser paths = new ArgsParser(args);
 
-		if (paths.handleArgs()) {
+		GATEPathBundle paths = initializePaths(args);
+
+		if (paths != null) {
 			AnnotatedCorpusReader reader = new AnnotatedCorpusReader(paths);
 			reader.read();
 		}
 
+	}
+
+	private static GATEPathBundle initializePaths(String[] args) {
+		GATEPathBundle paths = null;
+		boolean argsInvalid = false;
+		if (args.length >= 4) {
+			ArgsParser aPaths = new ArgsParser(args);
+			if (aPaths.handleArgs()) {
+				paths = aPaths;
+			} else {
+				argsInvalid = true;
+			}
+		} else {
+			argsInvalid = true;
+		}
+		if (argsInvalid) {
+			ConfigParser cfgParser = new ConfigParser();
+			if (cfgParser.parseConfig()) {
+				paths = cfgParser;
+			}
+
+		}
+		return paths;
 	}
 
 }
