@@ -29,6 +29,7 @@ public class ConfigParser implements GATEPathBundle {
 			if (pathToResources.startsWith("<full")) {
 				System.out.println(
 						"You will need to edit your config.properties file (in the root folder of the project) and set a proper file path to your resources folder.");
+				return false;
 			}
 			pathToGATEPlugins = pathToGATE + "/plugins";
 			pathToFileResources = "file:///" + pathToResources;
