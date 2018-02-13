@@ -21,6 +21,15 @@ public class ConfigParser implements GATEPathBundle {
 			configIn.close();
 			pathToGATE = configPaths.getProperty("gatepath");
 			pathToResources = configPaths.getProperty("resourcespath");
+			if (pathToGATE.startsWith("<full")) {
+				System.out.println(
+						"You will need to edit your config.properties file (in the root folder of the project) and set a proper file path to your GATE installation.");
+				return false;
+			}
+			if (pathToResources.startsWith("<full")) {
+				System.out.println(
+						"You will need to edit your config.properties file (in the root folder of the project) and set a proper file path to your resources folder.");
+			}
 			pathToGATEPlugins = pathToGATE + "/plugins";
 			pathToFileResources = "file:///" + pathToResources;
 			pathToResultOutput = pathToResources + "results/";
